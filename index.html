@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RectifierLab Lite</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eef2f6;--card:#fff;--tx:#12202e;--mut:#5b6a7a;--bd:#d3dbe5;--grid:#e2e8f0;--c1:#0b8a66;--c2:#d9480f;--c3:#3b5bdb;--on:#0b8a66}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1219;--card:#131c27;--tx:#e6edf5;--mut:#8fa1b4;--bd:#243245;--grid:#1d2937;--c1:#2fd6a1;--c2:#ffa94d;--c3:#8ea2ff;--on:#2fd6a1}}
+:root[data-theme="dark"]{--bg:#0c1219;--card:#131c27;--tx:#e6edf5;--mut:#8fa1b4;--bd:#243245;--grid:#1d2937;--c1:#2fd6a1;--c2:#ffa94d;--c3:#8ea2ff;--on:#2fd6a1}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:0 0 2px}.sub{color:var(--mut);margin:0 0 14px}
+.grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 10px}
+.row{margin:0 0 12px}.row label{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;margin-bottom:4px}
+.row label b{color:var(--tx);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--c1)}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.cap{font-size:12px;color:var(--mut);margin:0 0 4px}
+button{font:inherit;font-size:13px;padding:6px 11px;border-radius:7px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--c3);outline-offset:2px}
+button.on{background:var(--c1);border-color:var(--c1);color:#fff}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
+.stat span{display:block;color:var(--mut);font-size:12px}.stat b{font-size:19px;font-variant-numeric:tabular-nums}.stat small{color:var(--mut);font-size:12px}
+canvas{width:100%;height:440px;display:block}
+svg text{font:12px system-ui,sans-serif;fill:var(--tx)}
+.dev{fill:var(--bg);stroke:var(--mut);stroke-width:1.5}.dev.act{fill:var(--on);stroke:var(--on)}.dev.act+text{fill:#fff;font-weight:600}
+.ln{stroke:var(--mut);stroke-width:1.5;fill:none}
+.ln.hot{stroke:var(--c2);stroke-width:2.6}
+.read{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin-top:8px;font-variant-numeric:tabular-nums}.read b{color:var(--tx)}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-bottom:6px}
+.leg i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+.cur{display:flex;gap:12px;align-items:center;margin-top:10px}.cur .row{flex:1;margin:0}
+
+.scrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px}.scrow .cap{margin:0}.scrow .seg{margin:0}
+.top{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:14px;align-items:start}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}.chead h2{margin:0}.chead .seg,.chead .read{margin:0}
+.schbox{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px}
+.schbox svg{display:block;width:100%;height:auto;max-height:520px}
+.plot canvas{height:480px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.grp{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px}.grp h3{font-size:14px;margin:0 0 10px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grp .stat{background:var(--bg);border:0}.stat small{display:block}
+@media(max-width:980px){.top{grid-template-columns:1fr}.stats{grid-template-columns:1fr}}
+@media(max-width:560px){.plot canvas{height:340px}.stat b{font-size:17px}}
+.hero{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 18px;margin:0 0 14px;background:var(--card);border:1px solid var(--bd);border-left:5px solid var(--c1);border-radius:10px}
+.hero h1{font-size:26px;margin:0 0 2px}.hero .sub{margin:0;max-width:520px}
+.student{display:flex;align-items:center;gap:12px}
+.av{width:44px;height:44px;border-radius:50%;background:var(--c1);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:.5px}
+.si{display:flex;flex-direction:column;line-height:1.3}.si small{color:var(--mut);font-size:12px}.si b{font-size:17px}.si span{color:var(--mut);font-size:13px;font-variant-numeric:tabular-nums}
+</style></head>
+<body><div class="wrap">
+<header class="hero">
+ <div class="ht"><h1>RectifierLab Lite</h1><p class="sub">Interactive simulation of single-phase and three-phase diode and thyristor rectifiers</p></div>
+ <div class="student"><div class="av" aria-hidden="true">RK</div><div class="si"><small>Project by</small><b>Rajat Katiyar</b><span>Roll no. 24EE10008</span></div></div>
+</header>
+<div class="scrow"><span class="cap">Quick setups</span><div class="seg" id="sc"></div></div>
+<div class="top">
+ <section class="card" id="circuit">
+  <div class="chead"><h2 id="ctitle">Circuit</h2><div class="read" id="mode"></div></div>
+  <div class="schbox"><svg id="sch" viewBox="0 0 320 175" role="img" aria-label="Circuit schematic"></svg></div>
+  <div class="cur" id="curRow"><button id="play">Play</button><div class="row"><label>Cursor &omega;t <b id="tV">0&deg;</b></label><input type="range" id="th" min="0" max="359" step="1" value="0"></div></div>
+  <div class="read" id="read"></div>
+ </section>
+ <aside class="card" id="controls">
+  <h2>Controls</h2>
+  <p class="cap">Topology</p><div class="seg" id="topSeg"><button data-v="hw">1&phi; half-wave</button><button data-v="fb">1&phi; bridge</button><button data-v="3p">3&phi; bridge</button></div>
+  <p class="cap">Devices</p><div class="seg" id="devSeg"><button data-v="T">Thyristors</button><button data-v="D">Diodes</button><button id="semiBtn" data-v="S" style="display:none">Semi-converter</button></div>
+  <p class="cap">Load</p><div class="seg" id="loadSeg"><button data-v="R">R</button><button data-v="RL">RL</button><button data-v="RLE">RLE (motor)</button><button data-v="I">DC current source</button></div>
+  <div class="row" id="Rrow"><label>Resistance R <b id="RV"></b></label><input type="range" id="R" min="1" max="100" step="1"></div>
+  <div class="row" id="Lrow"><label>Inductance L <b id="LV"></b></label><input type="range" id="L" min="1" max="300" step="1"></div>
+  <div class="row" id="Irow"><label>Source current I<sub>dc</sub> <b id="IV"></b></label><input type="range" id="I" min="1" max="50" step="1"></div>
+  <div class="row" id="Erow"><label>Back-EMF E <b id="EV"></b></label><input type="range" id="E" min="0" max="300" step="5"></div>
+  <div class="row"><label><span id="Vlab">Source RMS</span> <b id="VV"></b></label><input type="range" id="V" min="100" max="400" step="5"></div>
+  <div class="row"><label>Firing angle &alpha; <b id="aV"></b></label><input type="range" id="a" min="0" max="170" step="1"></div>
+  <div class="seg" id="presets"></div>
+  <label class="chk"><input type="checkbox" id="fw"> Freewheeling diode</label>
+ </aside>
+</div>
+<section class="card plot">
+ <div class="chead"><h2>Waveforms</h2><div class="seg"><button id="tabw" class="on">Waveforms</button><button id="tabh">Source current harmonics</button></div></div>
+ <div class="seg" id="chSeg"><button data-v="L">Line V<sub>LL</sub></button><button data-v="P">Phase V<sub>ph</sub></button><button id="vavg">V<sub>avg</sub> line</button></div>
+ <div class="leg" id="leg"></div>
+ <canvas id="cv" aria-label="Plot"></canvas>
+</section>
+<div class="stats" id="stats"></div>
+</div>
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i)};
+var S={top:"fb",dev:"T",load:"RL",a:45,R:20,L:45,E:100,Idc:10,V:230,fw:false,th:0,view:"w",play:false,ch:"L",vavg:true};
+var N=3600,D=null,lastTop="",TP=2*Math.PI/3,H=25;
+var PR=[[0,1],[0,2],[1,2],[1,0],[2,0],[2,1]],SG3=[1,1,0,-1,-1,0];
+var ACT={hw:[["T1"]],fb:[["T1","T2"],["T3","T4"]],"3s":[["T1"],["T3"],["T5"]],"3p":[["T1","T6"],["T1","T2"],["T3","T2"],["T3","T4"],["T5","T4"],["T5","T6"]]};
+var NAMES={hw:"1φ half-wave","fb":"1φ bridge","3p":"3φ bridge"};
+
+function sim(){
+  var T=S.top,semi=S.dev==="S"&&T==="3p",P=T==="hw"?1:T==="fb"?2:semi?3:6,dt=0.02/N,Vm=Math.SQRT2*S.V,R=S.R;
+  var CS=S.load==="I",Is=S.Idc,fwE=S.fw&&!CS;
+  var L=S.load==="R"||CS?0:S.L/1000,E=S.load==="RLE"?S.E:0;
+  var cy=Math.min(120,Math.max(8,Math.ceil(5*L/R/0.02)+3)),ex=L>0?Math.exp(-R*dt/L):0;
+  var ae=S.dev==="D"?0:S.a,kA=Math.round(ae/360*N)+(T==="3p"?N/12:0),fire={};
+  for(var q=0;q<P;q++)fire[(kA+Math.round(q*N/P))%N]=q;
+  function ph(th){return [Vm*Math.sin(th),Vm*Math.sin(th-TP),Vm*Math.sin(th+TP)];}
+  function vf(k,th){
+    if(T==="hw")return Vm*Math.sin(th);
+    if(T==="fb")return (k?-1:1)*Vm*Math.sin(th);
+    var p=ph(th),r=PR[k];if(semi)return p[k]-Math.min(p[0],p[1],p[2]);return p[r[0]]-p[r[1]];
+  }
+  var i=CS?Is:0,c=CS&&T!=="hw"?P-1:-1,pend=-1,o={vs:new Float64Array(N),vb:new Float64Array(N),vc:new Float64Array(N),vo:new Float64Array(N),io:new Float64Array(N),is:new Float64Array(N),c:new Int8Array(N)};
+  for(var k=0;k<N*cy;k++){
+    var m=k%N,th=m/N*2*Math.PI;
+    if(fire[m]!==undefined)pend=fire[m];
+    if(pend>=0){var pv=vf(pend,th);if(semi&&c>=0&&c!==pend){var pp0=ph(th);pv=pp0[pend]-pp0[c];}if(pv>(CS?-1e-6:E)){c=pend;pend=-1;}else if(pv<-1e-3)pend=-1;}
+    var v=0,vo,ni;
+    if(c>=0){v=vf(c,th);if(v<0&&(CS?T==="hw":fwE&&L>0))c=-1;}
+    if(CS){vo=c>=0?v:0;ni=Is;}
+    else if(c>=0||i>0){
+      var vv=c>=0?v:0;
+      if(L>0){ni=i*ex+((vv-E)/R)*(1-ex);}else ni=(vv-E)/R;
+      if(ni<=1e-6){ni=0;c=-1;vo=E;}else vo=vv;
+    }else{ni=0;vo=E;}
+    i=ni;
+    if(k>=N*(cy-1)){
+      o.vs[m]=Vm*Math.sin(th);o.vb[m]=Vm*Math.sin(th-TP);o.vc[m]=Vm*Math.sin(th+TP);
+      o.vo[m]=vo;o.io[m]=i;o.c[m]=c;
+      var pq=ph(th),mi=pq[0]<=pq[1]&&pq[0]<=pq[2]?0:pq[1]<=pq[2]?1:2;
+      o.is[m]=c<0?0:semi?i*((c===0?1:0)-(mi===0?1:0)):T==="3p"?SG3[c]*i:(T==="fb"&&c===1?-i:i);
+    }
+  }
+  o.fa=Object.keys(fire).map(Number);
+  var sv=0,si=0,sp=0,sv2=0,si2=0,ss2=0,mn=1e9,j;
+  for(j=0;j<N;j++){sv+=o.vo[j];si+=o.io[j];sp+=o.vo[j]*o.io[j];sv2+=o.vo[j]*o.vo[j];si2+=o.io[j]*o.io[j];ss2+=o.is[j]*o.is[j];if(o.io[j]<mn)mn=o.io[j];}
+  var Isr=Math.sqrt(ss2/N),Sva=(T==="3p"?3:1)*S.V*Isr,Vdc=sv/N,Vr=Math.sqrt(sv2/N);
+  // harmonics of source current
+  var hs=[],I1=0,dpf=0;
+  for(var h=1;h<=H;h++){var A=0,B=0;for(j=0;j<N;j++){var ang=h*j/N*2*Math.PI;A+=o.is[j]*Math.cos(ang);B+=o.is[j]*Math.sin(ang);}
+    hs[h]=Math.sqrt(A*A+B*B)*2/N/Math.SQRT2;if(h===1){I1=hs[1];dpf=(A*A+B*B)>1e-12?B/Math.sqrt(A*A+B*B):0;}}
+  var t2=0;for(h=2;h<=H;h++)t2+=hs[h]*hs[h];
+  var ca=Math.cos(ae*Math.PI/180),r0=S.load==="R"||fwE||(CS&&T==="hw"),id=null;
+  if(S.load!=="RLE"){
+    if(T==="hw")id=r0?Vm/(2*Math.PI)*(1+ca):null;
+    else if(T==="fb")id=r0?Vm/Math.PI*(1+ca):2*Vm/Math.PI*ca;
+    else if(semi)id=(S.load==="R"&&ae>60)?null:3*Math.sqrt(3)*Vm/(2*Math.PI)*(1+ca);
+    else id=(r0&&ae>60)?3*Math.sqrt(3)*Vm/Math.PI*(1+Math.cos((ae+60)*Math.PI/180)):3*Math.sqrt(3)*Vm/Math.PI*ca;
+  }
+  if(id!==null&&!r0&&mn<=1e-6)id=null;
+  o.m={S:Sva,dpf:dpf,ff:Vdc>1e-6?Vr/Vdc:0,Vdc:Vdc,Idc:si/N,P:sp/N,Vrms:Vr,Irms:Math.sqrt(si2/N),Isr:Isr,PF:Sva>1e-9?sp/N/Sva:0,cont:mn>1e-6,id:id,
+    rf:Vdc>1e-6?Math.sqrt(Math.max(0,Vr*Vr/(Vdc*Vdc)-1)):0,thd:I1>1e-9?Math.sqrt(t2)/I1*100:0,hs:hs,I1:I1};
+  return o;
+}
+var nm=function(id){return S.dev==="D"||(S.dev==="S"&&"T4T6T2".indexOf(id)>=0)?id.replace("T","D"):id};
+var ak=function(){return S.top==="3p"&&S.dev==="S"?"3s":S.top};
+var fwShown=function(){return S.load==="I"?S.top==="hw":(S.fw&&S.load!=="R")};
+var f=function(x,d){return (Math.abs(x)<Math.pow(10,-d)/2?0:x).toFixed(d)};
+
+function dv(id,cx,y){return '<rect id="d_'+id+'" class="dev" x="'+(cx-18)+'" y="'+y+'" width="36" height="24" rx="5"/><text x="'+cx+'" y="'+(y+16)+'" text-anchor="middle">'+id+'</text>'}
+function tail(yT,yB,x0){var m=(yT+yB)/2;
+  return '<path id="rl" class="ln" d="M'+x0+' '+yT+'H283M'+x0+' '+yB+'H283M283 '+yT+'V'+(m-30)+'M283 '+(m+30)+'V'+yB+'"/>'+
+  '<g id="fwg"><path class="ln" d="M235 '+yT+'V'+(m-12)+'M235 '+(m+12)+'V'+yB+'"/><rect id="d_FW" class="dev" x="217" y="'+(m-12)+'" width="36" height="24" rx="5"/><text x="235" y="'+(m+4)+'" text-anchor="middle">D</text></g>'+
+  '<rect class="ln" x="258" y="'+(m-30)+'" width="50" height="60" rx="6"/><text x="283" y="'+(m-16)+'" text-anchor="middle">Load</text><text id="ldT" x="283" y="'+(m-2)+'" text-anchor="middle" style="font-size:10px"></text>'+
+  '<text id="voL" x="316" y="'+(yT-3)+'" text-anchor="end" style="font-size:10px">+ Vo</text><text x="316" y="'+(yB-4)+'" text-anchor="end" style="font-size:10px">- Vo (GND)</text>';}
+function leg(cx,yT,y1,y2,yB){return 'M'+cx+' '+yT+'V'+y1+'M'+cx+' '+(y1+24)+'V'+y2+'M'+cx+' '+(y2+24)+'V'+yB;}
+function schem(t){
+  if(t==="hw")return '<path class="ln" d="M30 76V40H72M108 40H283"/><circle cx="30" cy="90" r="14" class="ln"/><text x="25" y="94">~</text><path class="ln" d="M30 104V140H283"/>'+dv("T1",90,28)+tail(40,140,108);
+  if(t==="fb")return '<path class="ln" d="'+leg(110,10,20,120,155)+leg(210,10,20,120,155)+'M35 76V70H110M35 104V96H210"/><circle cx="35" cy="90" r="14" class="ln"/><text x="30" y="94">~</text><circle cx="110" cy="70" r="2.5" style="fill:var(--mut)"/><circle cx="210" cy="96" r="2.5" style="fill:var(--mut)"/><text x="60" y="66" style="font-size:10px">A</text><text x="150" y="92" style="font-size:10px">Neutral</text>'+
+    dv("T1",110,20)+dv("T4",110,120)+dv("T3",210,20)+dv("T2",210,120)+tail(10,155,110);
+  var s='';
+  [70,130,190].forEach(function(x,k){
+    s+='<path id="u'+k+'" class="ln" d="M'+x+' 10V87"/><path id="w'+k+'" class="ln" d="M'+x+' 87V165"/><path id="s'+k+'" class="ln" d="M'+(x-28)+' 87H'+x+'"/><circle id="p'+k+'" class="ln" cx="'+(x-37)+'" cy="87" r="9"/><text x="'+(x-37)+'" y="91" text-anchor="middle" style="font-size:10px">'+"ABC"[k]+'</text>';
+  });
+  function st(id,cx,y){return '<text id="s_'+id+'" x="'+cx+'" y="'+y+'" text-anchor="middle" style="font-size:8px;fill:var(--mut)"></text>';}
+  return s+dv("T1",70,20)+dv("T3",130,20)+dv("T5",190,20)+dv("T4",70,131)+dv("T6",130,131)+dv("T2",190,131)+st("T1",70,54)+st("T3",130,54)+st("T5",190,54)+st("T4",70,128)+st("T6",130,128)+st("T2",190,128)+tail(10,165,70);
+}
+
+function draw(){
+  var cv=$("cv"),dpr=window.devicePixelRatio||1,W=cv.clientWidth,Ht=cv.clientHeight;
+  if(!W||!Ht)return;
+  cv.width=Math.round(W*dpr);cv.height=Math.round(Ht*dpr);
+  var g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,Ht);
+  var cs=getComputedStyle(document.documentElement),col=function(n){return cs.getPropertyValue(n).trim()||"#888"};
+  var pl=46,pr=10,pw=W-pl-pr,m=D.m;
+  g.font="11px system-ui";
+  if(S.view==="h"){
+    var top=34,bot=Ht-30,bw=pw/H;
+    g.fillStyle=col("--tx");g.textAlign="left";g.fillText("THD = "+f(m.thd,1)+" %   |   I1 = "+f(m.I1,2)+" A rms",pl,16);
+    g.strokeStyle=col("--grid");g.fillStyle=col("--mut");g.textAlign="right";
+    [0,25,50,75,100].forEach(function(p){var y=bot-p/100*(bot-top);g.beginPath();g.moveTo(pl,y);g.lineTo(pl+pw,y);g.stroke();g.fillText(p+"%",pl-5,y+4)});
+    g.textAlign="center";
+    for(var h=1;h<=H;h++){
+      var pc=m.I1>1e-9?m.hs[h]/m.I1*100:0,x=pl+(h-1)*bw,bh=pc/100*(bot-top);
+      g.fillStyle=h===1?col("--c1"):col("--c3");g.fillRect(x+bw*0.15,bot-bh,bw*0.7,bh);
+      g.fillStyle=col("--mut");g.fillText(h,x+bw/2,Ht-14);
+      if(pc>4)g.fillText(f(pc,0),x+bw/2,bot-bh-4);
+    }
+    g.fillText("harmonic order",pl+pw/2,Ht-2);return;
+  }
+  var X=function(j){return pl+j/N*pw},Vm=Math.SQRT2*S.V*1.1*(S.top==="3p"?Math.sqrt(3):1),im=0,j;
+  for(j=0;j<N;j++)im=Math.max(im,Math.abs(D.io[j]),Math.abs(D.is[j]));
+  im=Math.max(im*1.15,0.5);
+  var P1={t:8,b:Ht*0.42},P2={t:Ht*0.46,b:Ht*0.86},P3={t:Ht*0.89,b:Ht-18};
+  function panel(P,mx,u){var mid=(P.t+P.b)/2,Y=function(v){return mid-v/mx*(P.b-P.t)/2};
+    g.strokeStyle=col("--grid");g.fillStyle=col("--mut");g.lineWidth=1;g.textAlign="right";
+    [-1,0,1].forEach(function(k){var y=Y(k*mx);g.beginPath();g.moveTo(pl,y);g.lineTo(pl+pw,y);g.stroke();g.fillText(Math.round(k*mx)+u,pl-5,y+4)});
+    for(var d=0;d<=360;d+=90){var x=pl+d/360*pw;g.beginPath();g.moveTo(x,P.t);g.lineTo(x,P.b);g.stroke()}return Y;}
+  function line(a,Y,c,w){g.strokeStyle=c;g.lineWidth=w;g.beginPath();for(var k=0;k<N;k+=2){var x=X(k),y=Y(a[k]);k?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();}
+  var Yv=panel(P1,Vm,"V");
+  if(S.top==="3p"){
+    if(S.ch==="L"){g.globalAlpha=0.5;[[D.vs,D.vb],[D.vb,D.vc],[D.vc,D.vs]].forEach(function(p){var l=p[0].map(function(x,k){return x-p[1][k]});line(l,Yv,col("--mut"),1);line(l.map(function(x){return -x}),Yv,col("--mut"),1)});g.globalAlpha=1;}
+    else{line(D.vs,Yv,"#e5484d",1.3);line(D.vb,Yv,"#3b82f6",1.3);line(D.vc,Yv,"#e0a800",1.3);}
+  }else line(D.vs,Yv,col("--mut"),1);
+  line(D.vo,Yv,col("--c1"),2.2);
+  if(S.vavg){g.setLineDash([5,4]);g.strokeStyle=col("--c3");g.lineWidth=1.3;g.beginPath();g.moveTo(pl,Yv(m.Vdc));g.lineTo(pl+pw,Yv(m.Vdc));g.stroke();g.setLineDash([]);}
+  var Yi=panel(P2,im,"A");line(D.is,Yi,col("--c3"),1.4);line(D.io,Yi,col("--c2"),2.2);
+  // conduction strip, drawn as runs
+  var s=0;
+  for(j=1;j<=N;j++){
+    if(j===N||D.c[j]!==D.c[s]){
+      var c=D.c[s],x0=X(s),w=X(j)-x0;
+      g.fillStyle=c<0?col("--grid"):"hsl("+(c*57+150)+",50%,"+(c%2?42:34)+"%)";
+      g.fillRect(x0,P3.t,w+0.5,P3.b-P3.t);
+      if(c>=0&&w>30){g.fillStyle="#fff";g.textAlign="center";g.fillText(ACT[ak()][c].map(nm).join(" "),x0+w/2,P3.b-4);}
+      s=j;
+    }
+  }
+  g.fillStyle="#f5b301";D.fa.forEach(function(k){g.fillRect(X(k)-3,P2.b-10,6,8)});
+  g.fillStyle=col("--mut");g.textAlign="center";
+  for(var d2=0;d2<=360;d2+=90)g.fillText(d2+"°",Math.min(Math.max(pl+d2/360*pw,pl+8),W-14),Ht-4);
+  var cx=pl+S.th/360*pw;g.strokeStyle=col("--tx");g.lineWidth=1.5;g.beginPath();g.moveTo(cx,2);g.lineTo(cx,P3.b);g.stroke();
+}
+
+function cursor(){
+  var j=Math.min(N-1,Math.floor(S.th/360*N)),c=D.c[j],T=S.top,fwOn=fwShown()&&c<0&&D.io[j]>1e-6;
+  $("tV").textContent=Math.floor(S.th)+"°";
+  Array.prototype.forEach.call($("sch").querySelectorAll(".dev"),function(e){e.setAttribute("class","dev")});
+  var act=c>=0?ACT[ak()][c]:[];
+  if(T==="3p"&&S.dev==="S"&&c>=0){var mi=D.vs[j]<=D.vb[j]&&D.vs[j]<=D.vc[j]?0:D.vb[j]<=D.vc[j]?1:2;act=act.concat(["T4","T6","T2"][mi]);}
+  act.forEach(function(id){var e=$("d_"+id);if(e)e.setAttribute("class","dev act")});
+  if(fwOn&&$("d_FW"))$("d_FW").setAttribute("class","dev act");
+  var rd='<span>v<sub>o</sub> <b>'+f(D.vo[j],1)+' V</b></span><span>i<sub>o</sub> <b>'+f(D.io[j],2)+' A</b></span><span>i<sub>a</sub> <b>'+f(D.is[j],2)+' A</b></span><span>v<sub>a</sub> <b>'+f(D.vs[j],1)+' V</b></span>';
+  $("read").innerHTML=rd;
+  var loop="";
+  $("rl").classList.toggle("hot",c>=0||fwOn);$("voL").textContent="+ Vo ("+f(D.vo[j],1)+" V)";
+  if(T==="3p"){
+    var tp=-1,bp=-1,TOP={T1:0,T3:1,T5:2},BOT={T4:0,T6:1,T2:2},PHN={T1:"A",T4:"A",T3:"B",T6:"B",T5:"C",T2:"C"};
+    act.forEach(function(id){if(id in TOP)tp=TOP[id];if(id in BOT)bp=BOT[id];});
+    for(var k=0;k<3;k++){[["u",tp===k],["w",bp===k],["s",tp===k||bp===k],["p",tp===k||bp===k]].forEach(function(q){$(q[0]+k).classList.toggle("hot",q[1]);});}
+    for(var id in PHN)$("s_"+id).textContent="Ph "+PHN[id]+" "+(act.indexOf(id)>=0?"ON":"OFF");
+    if(tp>=0&&bp>=0)loop=" (v"+"ABC"[tp]+"ABC"[bp]+")";
+  }
+  $("mode").innerHTML="<span>Conducting: <b>"+(act.length?act.map(nm).join(" + ")+loop:fwOn?"freewheeling diode":"none")+"</b></span>";
+}
+
+function update(){
+  var T=S.top,amax=T==="3p"?120:170;
+  if(S.dev==="S"&&T!=="3p")S.dev="T";$("semiBtn").style.display=T==="3p"?"":"none";
+  $("ctitle").textContent="Circuit \u2013 "+NAMES[T]+(S.dev==="D"?" (diodes)":S.dev==="S"?" (semi-converter)":" (thyristors)");
+  if(S.a>amax)S.a=amax;
+  var set=function(id,v){$(id).value=v};
+  $("a").max=amax;set("a",S.a);set("R",S.R);set("L",S.L);set("E",S.E);set("I",S.Idc);set("V",S.V);$("fw").checked=S.fw;$("a").disabled=S.dev==="D";$("fw").disabled=S.load==="R"||S.load==="I";
+  $("aV").textContent=(S.dev==="D"?0:S.a)+"°";$("RV").textContent=S.R+" Ω";$("LV").textContent=S.L+" mH";$("EV").textContent=S.E+" V";$("IV").textContent=S.Idc+" A";$("VV").textContent=S.V+" V";
+  var cs=S.load==="I";$("Rrow").style.display=cs?"none":"";$("Irow").style.display=cs?"":"none";$("Lrow").style.display=S.load==="R"||cs?"none":"";$("Erow").style.display=S.load==="RLE"?"":"none";
+  $("Vlab").textContent=T==="3p"?"Phase RMS":"Source RMS";
+  [["topSeg",S.top],["devSeg",S.dev],["loadSeg",S.load]].forEach(function(p){
+    Array.prototype.forEach.call($(p[0]).querySelectorAll("button"),function(b){b.classList.toggle("on",b.getAttribute("data-v")===p[1])})});
+  $("tabw").classList.toggle("on",S.view==="w");$("tabh").classList.toggle("on",S.view==="h");
+  $("chSeg").style.display=(S.view==="w"&&T==="3p")?"":"none";Array.prototype.forEach.call($("chSeg").querySelectorAll("button"),function(b){b.classList.toggle("on",b.id==="vavg"?S.vavg:b.getAttribute("data-v")===S.ch);});
+  
+  var vleg=T==="3p"?(S.ch==="L"?'<span>Faint: line voltages v<sub>LL</sub></span>':'<span><i style="background:#e5484d"></i>A <i style="background:#3b82f6"></i>B <i style="background:#e0a800"></i>C phase voltages</span>'):'<span><i style="background:var(--mut)"></i>Source voltage</span>';
+  $("leg").innerHTML=S.view==="w"?vleg+'<span><i style="background:var(--c1)"></i>Output v<sub>o</sub></span><span><i style="background:var(--c2)"></i>Load current</span><span><i style="background:var(--c3)"></i>Source current (phase a)</span>':'<span>Bars show each harmonic as a % of the fundamental</span>';
+  if(lastTop!==T){$("sch").innerHTML=schem(T);lastTop=T;}
+  $("fwg").style.opacity=fwShown()?"1":"0.3";$("d_FW").style.strokeDasharray=fwShown()?"":"3 2";
+  $("ldT").innerHTML=cs?'<tspan x="283">\u2193 I = '+S.Idc+' A</tspan><tspan x="283" dy="12">constant</tspan>':'<tspan x="283">R '+S.R+' \u03A9</tspan>'+(S.load==="R"?'':'<tspan x="283" dy="12">L '+S.L+' mH</tspan>')+(S.load==="RLE"?'<tspan x="283" dy="12">E '+S.E+' V</tspan>':'');
+  Array.prototype.forEach.call($("sch").querySelectorAll("rect.dev"),function(e){var id=e.id.slice(2);if(id!=="FW")e.nextSibling.textContent=nm(id)});
+  D=sim();var m=D.m;
+  var ae=S.dev==="D"?0:S.a,card=function(c){return '<div class="stat"><span>'+c[0]+'</span><b>'+c[1]+'</b><small>'+c[2]+'</small></div>';};
+  var grp=[["DC output",[["Avg DC voltage",f(m.Vdc,1)+" V",m.id===null?"no closed form here":"ideal "+f(m.id,1)+" V"],["Avg DC current",f(m.Idc,2)+" A","I_rms "+f(m.Irms,2)+" A"],["Output power",f(m.P,0)+" W","V_rms "+f(m.Vrms,1)+" V"],["Ripple factor",f(m.rf,3),"form factor "+f(m.ff,2)]]],
+   ["AC source side",[["Power factor",f(m.PF,3),"P / S_in"],["Displacement cos \u03C61",f(m.dpf,3),"fundamental only"],["Current THD",f(m.thd,1)+" %","up to 25th harmonic"],["Apparent power",f(m.S,0)+" VA","source I_rms "+f(m.Isr,2)+" A"]]],
+   ["Operating point",[["Conduction",m.cont?"Continuous":"Discontinuous",NAMES[T]],["Firing angle",ae+"\u00B0",S.dev==="D"?"diodes":S.dev==="S"?"semi-converter":"thyristors"],["Load",{R:"Resistive",RL:"R-L",RLE:"R-L-E",I:"DC current"}[S.load],S.load==="I"?S.Idc+" A constant":S.R+" \u03A9"+(S.load==="R"?"":", "+S.L+" mH")],["Source",S.V+" V",T==="3p"?"phase RMS, 50 Hz":"RMS, 50 Hz"]]]];
+  $("stats").innerHTML=grp.map(function(g){return '<section class="grp"><h3>'+g[0]+'</h3><div class="cards">'+g[1].map(card).join("")+'</div></section>';}).join("");
+  cursor();draw();
+}
+
+function bind(id,k){$(id).addEventListener("input",function(e){S[k]=Number(e.target.value);update()})}
+bind("a","a");bind("R","R");bind("L","L");bind("E","E");bind("I","Idc");bind("V","V");
+$("th").addEventListener("input",function(e){S.th=Number(e.target.value);cursor();draw()});
+$("fw").addEventListener("change",function(e){S.fw=e.target.checked;update()});
+[["topSeg","top"],["devSeg","dev"],["loadSeg","load"]].forEach(function(p){
+  Array.prototype.forEach.call($(p[0]).querySelectorAll("button"),function(b){b.addEventListener("click",function(){S[p[1]]=b.getAttribute("data-v");update()})})});
+Array.prototype.forEach.call($("chSeg").querySelectorAll("button"),function(b){b.addEventListener("click",function(){if(b.id==="vavg")S.vavg=!S.vavg;else S.ch=b.getAttribute("data-v");update();});});
+$("tabw").addEventListener("click",function(){S.view="w";update()});
+$("tabh").addEventListener("click",function(){S.view="h";update()});
+[0,30,45,60,90,120,150].forEach(function(a){var b=document.createElement("button");b.textContent=a+"°";b.addEventListener("click",function(){S.a=a;update()});$("presets").appendChild(b)});
+var SC=[["1φ bridge, RL",{top:"fb",load:"RL",a:45,fw:false,dev:"T",R:20,L:45}],
+ ["Half-wave + freewheeling",{top:"hw",load:"RL",a:60,fw:true,dev:"T",R:20,L:45}],
+ ["3φ bridge, α = 30°",{top:"3p",load:"RL",a:30,fw:false,dev:"T",R:10,L:100}],
+ ["DC motor (RLE)",{top:"fb",load:"RLE",a:30,fw:false,dev:"T",R:5,L:50,E:120}],
+ ["3φ bridge, DC current source",{top:"3p",load:"I",a:30,fw:false,dev:"T",Idc:10,V:230}],
+ ["3\u03C6 semi-converter",{top:"3p",load:"RL",a:60,fw:false,dev:"S",R:10,L:100,V:230}],
+ ["Diode bridge",{top:"fb",load:"RL",a:0,fw:false,dev:"D",R:20,L:45}]];
+SC.forEach(function(s){var b=document.createElement("button");b.textContent=s[0];b.addEventListener("click",function(){for(var k in s[1])S[k]=s[1][k];update()});$("sc").appendChild(b)});
+var last=0;
+function tick(t){
+  if(!S.play)return;
+  if(t-last>30){last=t;S.th=(S.th+2)%360;$("th").value=Math.floor(S.th);cursor();if(S.view==="w")draw();}
+  requestAnimationFrame(tick);
+}
+$("play").addEventListener("click",function(){S.play=!S.play;$("play").textContent=S.play?"Pause":"Play";if(S.play)requestAnimationFrame(tick)});
+window.addEventListener("resize",function(){if(D)draw()});
+update();
+})();
+</script>
+</body></html>
